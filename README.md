@@ -1,0 +1,2 @@
+# wanikani-stats-checker
+
