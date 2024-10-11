@@ -7,9 +7,44 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+// https://mholt.github.io/json-to-go/
+type WaniKaniResponse struct {
+	Object string `json:"object"`
+	URL    string `json:"url"`
+	Pages  struct {
+		PerPage     float64 `json:"per_page"`
+		NextURL     string  `json:"next_url"`
+		PreviousURL any     `json:"previous_url"`
+	} `json:"pages"`
+	TotalCount    float64   `json:"total_count"`
+	DataUpdatedAt time.Time `json:"data_updated_at"`
+	ReviewEntries []struct {
+		ID            float64   `json:"id"`
+		Object        string    `json:"object"`
+		URL           string    `json:"url"`
+		DataUpdatedAt time.Time `json:"data_updated_at"`
+		Data          struct {
+			CreatedAt            time.Time `json:"created_at"`
+			SubjectID            float64   `json:"subject_id"`
+			SubjectType          string    `json:"subject_type"`
+			MeaningCorrect       float64   `json:"meaning_correct"`
+			MeaningIncorrect     float64   `json:"meaning_incorrect"`
+			MeaningMaxStreak     float64   `json:"meaning_max_streak"`
+			MeaningCurrentStreak float64   `json:"meaning_current_streak"`
+			ReadingCorrect       float64   `json:"reading_correct"`
+			ReadingIncorrect     float64   `json:"reading_incorrect"`
+			ReadingMaxStreak     float64   `json:"reading_max_streak"`
+			ReadingCurrentStreak float64   `json:"reading_current_streak"`
+			PercentageCorrect    float64   `json:"percentage_correct"`
+			Hidden               bool      `json:"hidden"`
+		} `json:"data"`
+	} `json:"data"`
+}
 
 func LongestStreak(c *gin.Context) (body_string_return string) {
 	body_string_return = GetReviewStatistics(c, "")
@@ -18,37 +53,23 @@ func LongestStreak(c *gin.Context) (body_string_return string) {
 	var highest_streak_meaning_id float64 = 0
 	var highest_streak_reading float64 = 0
 	var highest_streak_reading_id float64 = 0
-	var result map[string]interface{}
-	json.Unmarshal([]byte(body_string_return), &result)
 
-	for key, value := range result {
-		switch value.(type) {
-		case interface{}:
-			if key == "data" {
-				for _, value2 := range value.([]interface{}) {
-					for key3, value3 := range value2.(map[string]interface{}) {
-						if key3 == "data" {
-							for key4, value4 := range value3.(map[string]interface{}) {
-								if key4 == "meaning_max_streak" {
-									if highest_streak_meaning < value4.(float64) {
-										highest_streak_meaning = value4.(float64)
-										highest_streak_meaning_id = value3.(map[string]interface{})["subject_id"].(float64)
-										fmt.Println("New highest streak meaning", highest_streak_meaning, "for subject", highest_streak_meaning_id)
-									}
-								} else if key4 == "reading_max_streak" {
-									if highest_streak_reading < value4.(float64) {
-										highest_streak_reading = value4.(float64)
-										highest_streak_reading_id = value3.(map[string]interface{})["subject_id"].(float64)
-										fmt.Println("New highest streak reading", highest_streak_reading, "for subject", highest_streak_reading_id)
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+	var response WaniKaniResponse
+	json.Unmarshal([]byte(body_string_return), &response)
+
+	for _, review_entry := range response.ReviewEntries {
+		if highest_streak_meaning < review_entry.Data.MeaningMaxStreak {
+			highest_streak_meaning = review_entry.Data.MeaningMaxStreak
+			highest_streak_meaning_id = review_entry.Data.SubjectID
+			fmt.Println("New highest streak meaning", highest_streak_meaning, "for subject", highest_streak_meaning_id)
+		}
+		if highest_streak_reading < review_entry.Data.ReadingMaxStreak {
+			highest_streak_reading = review_entry.Data.ReadingMaxStreak
+			highest_streak_reading_id = review_entry.Data.SubjectID
+			fmt.Println("New highest streak reading", highest_streak_reading, "for subject", highest_streak_reading_id)
 		}
 	}
+
 	body_string_return = strconv.FormatFloat(highest_streak_meaning, 'f', -1, 64)
 	body_string_return += "," + strconv.FormatFloat(highest_streak_meaning_id, 'f', -1, 64)
 	body_string_return += GetSubjectFields(c, highest_streak_meaning_id)
