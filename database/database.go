@@ -2,9 +2,11 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
+	"test/wanikani"
 
 	_ "github.com/lib/pq"
 
@@ -47,7 +49,6 @@ func ConnectDatabase() {
 		Db = db
 		fmt.Println("Successfully connected to database!")
 	}
-	SetUpTables()
 }
 
 func SetUpDatabase() {
@@ -60,7 +61,7 @@ func SetUpDatabase() {
 }
 
 func SetUpTables() {
-	_, err := Db.Exec("CREATE TABLE " + os.Getenv("POSTGRES_TABLE_NAME") + " (data VARCHAR)")
+	_, err := Db.Exec("CREATE TABLE reviewstatistics (ID VARCHAR, DataUpdatedAt VARCHAR, SubjectID VARCHAR, CreatedAt VARCHAR, SubjectType VARCHAR, MeaningCorrect VARCHAR, MeaningIncorrect VARCHAR, MeaningMaxStreak VARCHAR, MeaningCurrentStreak VARCHAR, ReadingCorrect VARCHAR, ReadingIncorrect VARCHAR, ReadingMaxStreak VARCHAR, ReadingCurrentStreak VARCHAR, PercentageCorrect VARCHAR, Hidden VARCHAR)")
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -68,18 +69,19 @@ func SetUpTables() {
 	}
 }
 
-type ReviewStatistics struct {
-	Data string
-}
-
 func AddReviewStatistics(data string) {
-	data_struct := ReviewStatistics{Data: data}
+	var response wanikani.WaniKaniResponse
+	json.Unmarshal([]byte(data), &response)
 
-	_, err := Db.Exec("insert into reviewstatistics(data) values ($1)", data_struct.Data)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Data inserted successfully!")
+	SetUpTables()
+
+	for _, review_entry := range response.ReviewEntries {
+		_, err := Db.Exec("insert into reviewstatistics(ID, DataUpdatedAt, SubjectID, CreatedAt, SubjectType, MeaningCorrect, MeaningIncorrect, MeaningMaxStreak, MeaningCurrentStreak, ReadingCorrect, ReadingIncorrect, ReadingMaxStreak, ReadingCurrentStreak, PercentageCorrect, Hidden) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)", review_entry.ID, review_entry.DataUpdatedAt, review_entry.Data.SubjectID, review_entry.Data.CreatedAt, review_entry.Data.SubjectType, review_entry.Data.MeaningCorrect, review_entry.Data.MeaningIncorrect, review_entry.Data.MeaningMaxStreak, review_entry.Data.MeaningCurrentStreak, review_entry.Data.ReadingCorrect, review_entry.Data.ReadingIncorrect, review_entry.Data.ReadingMaxStreak, review_entry.Data.ReadingCurrentStreak, review_entry.Data.PercentageCorrect, review_entry.Data.Hidden)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println("Data inserted successfully!")
+		}
 	}
 
 }
