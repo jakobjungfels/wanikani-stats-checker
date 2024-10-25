@@ -1,13 +1,23 @@
 package wanikani
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func TestWaniKaniGet(t *testing.T) {
+	err := godotenv.Load("/home/jakob/projects/wanikani-stats-checker/.env")
+	if err != nil {
+		fmt.Println("Error occurred while loading .env")
+	}
+	gin.SetMode(gin.TestMode)
+	context, _ := gin.CreateTestContext(httptest.NewRecorder())
 	type args struct {
 		c   *gin.Context
 		url string
@@ -15,14 +25,32 @@ func TestWaniKaniGet(t *testing.T) {
 	tests := []struct {
 		name     string
 		args     args
-		wantBody []byte
+		wantBody string
 	}{
-		// TODO: Add test cases.
+		{
+			name: "TestCaseOne",
+			args: args{
+				c:   context,
+				url: "https://api.wanikani.com/v2/review_statistics",
+			},
+			wantBody: "https://api.wanikani.com/v2/review_statistics",
+		},
+		{
+			name: "TestCaseTwo",
+			args: args{
+				c:   context,
+				url: "https://api.wanikani.com/v2/subjects",
+			},
+			wantBody: "https://api.wanikani.com/v2/subjects",
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotBody := WaniKaniGet(tt.args.c, tt.args.url); !reflect.DeepEqual(gotBody, tt.wantBody) {
-				t.Errorf("WaniKaniGet() = %v, want %v", gotBody, tt.wantBody)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var response WaniKaniResponse
+			_, body_byte := Get(test.args.c, test.args.url)
+			json.Unmarshal([]byte(body_byte), &response)
+			if !reflect.DeepEqual(response.URL, test.wantBody) {
+				t.Errorf("Get() = %v, want %v", response.URL, test.wantBody)
 			}
 		})
 	}

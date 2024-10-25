@@ -19,20 +19,20 @@ func main() {
 	})
 	router.GET("/subjects/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		body_string := wanikani.GetSubjects(c, id)
+		body_string, _ := wanikani.GetSubjects(c, id)
 		c.JSON(http.StatusOK, gin.H{
 			"message": string(body_string),
 		})
 	})
 	router.GET("/review_statistics/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		body_string := wanikani.GetReviewStatistics(c, id)
+		body_string, _ := wanikani.GetReviewStatistics(c, id)
 		c.JSON(http.StatusOK, gin.H{
 			"message": string(body_string),
 		})
 	})
 	router.GET("/review_statistics", func(c *gin.Context) {
-		body_string := wanikani.GetReviewStatistics(c, "")
+		body_string, _ := wanikani.GetReviewStatistics(c, "")
 		database.AddReviewStatistics(body_string)
 		c.JSON(http.StatusOK, gin.H{
 			"message": string(body_string),

@@ -46,8 +46,8 @@ type WaniKaniResponse struct {
 	} `json:"data"`
 }
 
-func LongestStreak(c *gin.Context) (body_string_return string) {
-	body_string_return = GetReviewStatistics(c, "")
+func LongestStreak(context *gin.Context) (body_string_return string) {
+	body_string_return = GetReviewStatistics(context, "")
 
 	var highest_streak_meaning float64 = 0
 	var highest_streak_meaning_id float64 = 0
@@ -72,17 +72,17 @@ func LongestStreak(c *gin.Context) (body_string_return string) {
 
 	body_string_return = strconv.FormatFloat(highest_streak_meaning, 'f', -1, 64)
 	body_string_return += "," + strconv.FormatFloat(highest_streak_meaning_id, 'f', -1, 64)
-	body_string_return += GetSubjectFields(c, highest_streak_meaning_id)
+	body_string_return += GetSubjectFields(context, highest_streak_meaning_id)
 
 	body_string_return += ";" + strconv.FormatFloat(highest_streak_reading, 'f', -1, 64)
 	body_string_return += "," + strconv.FormatFloat(highest_streak_reading_id, 'f', -1, 64)
-	body_string_return += GetSubjectFields(c, highest_streak_reading_id)
+	body_string_return += GetSubjectFields(context, highest_streak_reading_id)
 
 	return
 }
 
-func GetSubjectFields(c *gin.Context, id float64) (body_string_return string) {
-	body_string_subject := GetSubjects(c, strconv.FormatFloat(id, 'f', -1, 64))
+func GetSubjectFields(context *gin.Context, id float64) (body_string_return string) {
+	body_string_subject := GetSubjects(context, strconv.FormatFloat(id, 'f', -1, 64))
 	var result_subject map[string]interface{}
 	json.Unmarshal([]byte(body_string_subject), &result_subject)
 	for key, value := range result_subject {
@@ -108,23 +108,21 @@ func GetSubjectFields(c *gin.Context, id float64) (body_string_return string) {
 	return
 }
 
-func GetSubjects(c *gin.Context, id string) (body_string_return string) {
-	body := Get(c, "https://api.wanikani.com/v2/subjects/"+id)
-	body_string_return = string(body)
+func GetSubjects(context *gin.Context, id string) (body_string_return string) {
+	body_string_return, _ = Get(context, "https://api.wanikani.com/v2/subjects/"+id)
 	return
 }
 
-func GetReviewStatistics(c *gin.Context, id string) (body_string_return string) {
-	body := Get(c, "https://api.wanikani.com/v2/review_statistics/"+id)
-	body_string_return = string(body)
+func GetReviewStatistics(context *gin.Context, id string) (body_string_return string) {
+	body_string_return, _ = Get(context, "https://api.wanikani.com/v2/review_statistics/"+id)
 	return
 }
 
-func Get(c *gin.Context, url string) (body []byte) {
+func Get(context *gin.Context, url string) (body string, body_byte []byte) {
 	var bearer = "Bearer " + os.Getenv("WANIKANI_TOKEN")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 	}
@@ -132,16 +130,17 @@ func Get(c *gin.Context, url string) (body []byte) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 	}
-	body, err = io.ReadAll(resp.Body)
+	body_byte, err = io.ReadAll(resp.Body)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 	}
 	resp.Body.Close()
+	body = string(body_byte)
 	return
 }
