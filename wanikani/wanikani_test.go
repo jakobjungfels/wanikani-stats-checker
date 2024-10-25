@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func TestWaniKaniGet(t *testing.T) {
+func TestWaniKaniGet(testing_module *testing.T) {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		fmt.Println("Error occurred while loading .env")
@@ -45,12 +45,12 @@ func TestWaniKaniGet(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+		testing_module.Run(test.name, func(testing_module *testing.T) {
 			var response WaniKaniResponse
 			_, body_byte := Get(test.args.c, test.args.url)
 			json.Unmarshal([]byte(body_byte), &response)
 			if !reflect.DeepEqual(response.URL, test.wantBody) {
-				t.Errorf("Get() = %v, want %v", response.URL, test.wantBody)
+				testing_module.Errorf("Get() = %v, want %v", response.URL, test.wantBody)
 			}
 		})
 	}
