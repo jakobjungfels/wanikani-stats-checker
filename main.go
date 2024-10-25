@@ -33,7 +33,7 @@ func main() {
 	})
 	router.GET("/review_statistics", func(c *gin.Context) {
 		body_string := wanikani.GetReviewStatistics(c, "")
-		database.AddReviewStatistics(body_string)
+		database.SaveReviewStatisticsToDB(body_string)
 		c.JSON(http.StatusOK, gin.H{
 			"message": string(body_string),
 		})

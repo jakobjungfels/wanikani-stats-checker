@@ -69,7 +69,7 @@ func SetUpTables() {
 	}
 }
 
-func AddReviewStatistics(data string) {
+func SaveReviewStatisticsToDB(data string) {
 	var response wanikani.WaniKaniResponse
 	json.Unmarshal([]byte(data), &response)
 
