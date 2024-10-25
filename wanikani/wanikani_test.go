@@ -12,7 +12,7 @@ import (
 )
 
 func TestWaniKaniGet(t *testing.T) {
-	err := godotenv.Load("/home/jakob/projects/wanikani-stats-checker/.env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		fmt.Println("Error occurred while loading .env")
 	}
