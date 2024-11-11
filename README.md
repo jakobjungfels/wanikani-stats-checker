@@ -12,3 +12,6 @@ docker run --net=host -p 5432:5432 -it -e POSTGRES_USER=postgres -e POSTGRES_PAS
 
 Start backend via main.go
 
+```shell
+~/go/bin/swagger generate spec -o ./swagger.json
+```

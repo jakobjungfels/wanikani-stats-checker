@@ -1,0 +1,89 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server for managing streaks, subjects, and review
+    statistics.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Your API Title
+  version: "1.0"
+paths:
+  /review_statistics:
+    get:
+      description: Retrieves all review statistics and saves them to the database.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: All review statistics information'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get All Review Statistics
+      tags:
+      - ReviewStatistics
+  /review_statistics/{id}:
+    get:
+      description: Retrieves review statistics for a specific subject.
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Review statistics information'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Review Statistics by ID
+      tags:
+      - ReviewStatistics
+  /streak:
+    get:
+      description: Retrieves the user's longest streak.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Longest streak data'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Longest Streak
+      tags:
+      - Streak
+  /subjects/{id}:
+    get:
+      description: Retrieves information about a specific subject.
+      parameters:
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Subject information'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Subject by ID
+      tags:
+      - Subjects
+swagger: "2.0"

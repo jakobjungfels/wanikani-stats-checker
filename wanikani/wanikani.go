@@ -46,7 +46,7 @@ type WaniKaniResponse struct {
 	} `json:"data"`
 }
 
-func LongestStreak(context *gin.Context) (body_string_return string) {
+func GetLongestStreak(context *gin.Context) (body_string_return string) {
 	body_string_return = GetReviewStatistics(context, "")
 
 	var highest_streak_meaning float64 = 0
