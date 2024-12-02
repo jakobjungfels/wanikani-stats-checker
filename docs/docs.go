@@ -147,7 +147,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is a sample server for managing streaks, subjects, and review statistics.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-
 }
 
 func init() {
